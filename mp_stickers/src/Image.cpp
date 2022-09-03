@@ -1,7 +1,7 @@
 #include "Image.h"
 #include <math.h>
-#include <vector>
 #include <cstdlib>
+#include <cmath>
 
 void Image::lighten() {
     for (unsigned int i = 0; i < cs225::PNG::height(); ++i) {
@@ -121,7 +121,11 @@ void Image::rotateColor(double degrees) {
                     cs225::PNG::getPixel(i, j).h -= 360;
                 }
             } else if (cs225::PNG::getPixel(i, j).h + degrees < 0) {
-
+                int diff = cs225::PNG::getPixel(i, j).h + degrees;
+                cs225::PNG::getPixel(i, j).h = abs(360 + diff);
+                while (cs225::PNG::getPixel(i, j).h > 360) {
+                    cs225::PNG::getPixel(i, j).h -= 360;
+                }
             } else {
                 cs225::PNG::getPixel(i, j).h = cs225::PNG::getPixel(i, j).h + degrees;
             }
@@ -148,45 +152,17 @@ int Image::findClosest(double x) {
 }
 
 void Image::scale(double factor) {
-    if (factor == 1) {
-        return;
-    } 
     cs225::PNG new_image = cs225::PNG(round(factor * cs225::PNG::width()), round(factor * cs225::PNG::height()));
-    if (factor > 1) {
+    if (factor <  1) {
         for (unsigned int i = 0; i < cs225::PNG::height(); ++i) {
             for (unsigned int j = 0; j < cs225::PNG::width(); ++j) {
-                for (unsigned int k = round(factor); k >= 0; --k) {
-                    if (j + k >= new_image.width()) {
-                        continue;
-                    } else {
-                        new_image.getPixel(i, j + k) = cs225::PNG::getPixel(i, j);
-                    }
-                }
-                for (unsigned int k = round(factor); k >= 0; --k) {
-                    if (i + k >= new_image.height()) {
-                        continue;
-                    } else {
-                        new_image.getPixel(i + k, j) = cs225::PNG::getPixel(i, j);
-                    }
-                }
+                new_image.getPixel(i, j) = cs225::PNG::getPixel(floor(i * factor), floor(j * factor));
             }
         }
     } else {
-        std::vector<cs225::HSLAPixel> vec;
-        int k = factor;
-        int l = 0;
-        for (unsigned int i = 0; i < cs225::PNG::height(); ++i) {
-            for (unsigned int j = 0; j < cs225::PNG::width(); ++j) { 
-                if (k > 1) {
-                    vec.push_back(cs225::PNG::getPixel(i, j));
-                    k -= 1;
-                }
-            }
-        }
         for (unsigned int i = 0; i < new_image.height(); ++i) {
             for (unsigned int j = 0; j < new_image.width(); ++j) {
-                new_image.getPixel(i, j) = vec.at(l);
-                ++l;
+                new_image.getPixel(i, j) = cs225::PNG::getPixel(floor(i/factor), floor(j/factor));
             }
         }
     }
@@ -196,15 +172,6 @@ void Image::scale(double factor) {
             cs225::PNG::getPixel(i, j) = new_image.getPixel(i, j);
         }
     }
-}
-
-int Image::gcd(int a, int b) {
-    while (b > 0) {
-        int remainder = a % b;
-        a = b;
-        b = remainder;
-    }
-    return a;
 }
 
 void Image::scale(unsigned w, unsigned h) {
@@ -258,3 +225,52 @@ void Image::scale(unsigned w, unsigned h) {
         }
     }
 }
+
+//     if (factor == 1) {
+//         return;
+//     } 
+//     cs225::PNG new_image = cs225::PNG(round(factor * cs225::PNG::width()), round(factor * cs225::PNG::height()));
+//     if (factor > 1) {
+//         for (unsigned int i = 0; i < cs225::PNG::height(); ++i) {
+//             for (unsigned int j = 0; j < cs225::PNG::width(); ++j) {
+//                 for (unsigned int k = round(factor); k >= 0; --k) {
+//                     if (j + k >= new_image.width()) {
+//                         continue;
+//                     } else {
+//                         new_image.getPixel(i, j + k) = cs225::PNG::getPixel(i, j);
+//                     }
+//                 }
+//                 for (unsigned int k = round(factor); k >= 0; --k) {
+//                     if (i + k >= new_image.height()) {
+//                         continue;
+//                     } else {
+//                         new_image.getPixel(i + k, j) = cs225::PNG::getPixel(i, j);
+//                     }
+//                 }
+//             }
+//         }
+//     } else {
+//         std::vector<cs225::HSLAPixel> vec;
+//         int k = factor;
+//         int l = 0;
+//         for (unsigned int i = 0; i < cs225::PNG::height(); ++i) {
+//             for (unsigned int j = 0; j < cs225::PNG::width(); ++j) { 
+//                 if (k > 1) {
+//                     vec.push_back(cs225::PNG::getPixel(i, j));
+//                     k -= 1;
+//                 }
+//             }
+//         }
+//         for (unsigned int i = 0; i < new_image.height(); ++i) {
+//             for (unsigned int j = 0; j < new_image.width(); ++j) {
+//                 new_image.getPixel(i, j) = vec.at(l);
+//                 ++l;
+//             }
+//         }
+//     }
+//     cs225::PNG::resize(round(factor * cs225::PNG::width()), round(factor * cs225::PNG::height()));
+//     for (unsigned int i = 0; i < new_image.height(); ++i) {
+//         for (unsigned int j = 0; j < new_image.width(); ++j) {
+//             cs225::PNG::getPixel(i, j) = new_image.getPixel(i, j);
+//         }
+//     }

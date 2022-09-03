@@ -24,5 +24,4 @@ class Image : public cs225::PNG {
         void scale(unsigned w, unsigned h);
     private:
         int findClosest(double x);
-        int gcd(int a, int b);
 };
